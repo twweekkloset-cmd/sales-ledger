@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Tweek Closet — Ledger</title>
+<style>
+  :root {
+    --ink: #14213d;
+    --ink-soft: #2b3a5e;
+    --paper: #f7f4ec;
+    --paper-line: #e4ddc9;
+    --rule: #c9bfa0;
+    --green: #1f6f4d;
+    --green-soft: #e7f1ea;
+    --red: #9b2c2c;
+    --red-soft: #f6e9e9;
+    --gold: #b8862c;
+    --gold-soft: #fdf3e0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background-color: var(--paper);
+    background-image: repeating-linear-gradient(
+      180deg, transparent, transparent 35px,
+      var(--paper-line) 35px, var(--paper-line) 36px
+    );
+    min-height: 100vh;
+  }
+  .mono { font-family: "JetBrains Mono", Consolas, "SF Mono", Menlo, "Courier New", monospace; }
+  select, input, button, textarea { font-family: inherit; }
+  input, select { font-family: "JetBrains Mono", Consolas, "SF Mono", Menlo, monospace; }
+
+  /* ── Layout ── */
+  .wrap { max-width: 1152px; margin: 0 auto; padding: 0 24px; }
+  .flex { display: flex; }
+  .flex-wrap { flex-wrap: wrap; }
+  .flex-col { display: flex; flex-direction: column; }
+  .items-center { align-items: center; }
+  .items-baseline { align-items: baseline; }
+  .justify-between { justify-content: space-between; }
+  .gap-1 { gap: 4px; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; } .gap-5 { gap: 20px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 640px) { .grid-sm-3 { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 768px) {
+    .grid-md-6 { grid-template-columns: repeat(6, 1fr); }
+    .md-col-1 { grid-column: span 1; }
+    .md-col-2 { grid-column: span 2; }
+    .md-col-6 { grid-column: span 6; }
+  }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+  .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hidden { display: none !important; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* ── Type ── */
+  .text-3xl { font-size: 30px; } .text-2xl { font-size: 24px; }
+  .text-xl { font-size: 20px; } .text-lg { font-size: 18px; }
+  .text-sm { font-size: 14px; } .text-xs { font-size: 12px; }
+  .font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
+  .tracking-tight { letter-spacing: -0.02em; }
+  .tracking-wide { letter-spacing: 0.04em; }
+  .tracking-widest { letter-spacing: 0.12em; }
+  .uppercase { text-transform: uppercase; }
+
+  /* ── Colour helpers ── */
+  .c-ink { color: var(--ink); } .c-soft { color: var(--ink-soft); }
+  .c-green { color: var(--green); } .c-red { color: var(--red); }
+  .c-gold { color: var(--gold); }
+
+  /* ── Spacing ── */
+  .p-5 { padding: 20px; } .p-6 { padding: 24px; }
+  .px-6 { padding-left: 24px; padding-right: 24px; }
+  .py-4 { padding-top: 16px; padding-bottom: 16px; }
+  .py-14 { padding-top: 56px; padding-bottom: 56px; }
+  .mb-5 { margin-bottom: 20px; } .mb-8 { margin-bottom: 32px; }
+  .mb-10 { margin-bottom: 40px; } .mt-8 { margin-top: 32px; }
+
+  /* ── Card surfaces ── */
+  .ledger-card {
+    background: #fffdf8;
+    border: 1px solid var(--paper-line);
+    border-radius: 4px;
+    box-shadow: 0 1px 0 var(--paper-line), 0 8px 24px -12px rgba(20,33,61,0.18);
+  }
+  .tab-stub { position: relative; }
+  .tab-stub::before {
+    content: ''; position: absolute; top: -1px; left: 0;
+    width: 38px; height: 6px; background: var(--ink);
+    border-radius: 0 0 4px 4px;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 13px; font-weight: 600; border-radius: 4px;
+    cursor: pointer; border: 1px solid transparent;
+    transition: background-color .15s, color .15s, border-color .15s;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn-primary { background: var(--ink); color: #fffdf8; padding: 10px 20px; border: none; }
+  .btn-primary:hover { background: var(--ink-soft); }
+  .btn-outline { border-color: var(--ink); color: var(--ink); background: transparent; padding: 8px 12px; }
+  .btn-outline:hover { background: var(--ink); color: #fffdf8; }
+  .btn-danger { border-color: var(--red); color: var(--red); background: transparent; padding: 8px 12px; }
+  .btn-danger:hover { background: var(--red); color: #fff; }
+  .btn-gold { background: var(--gold); color: #fff; padding: 10px 18px; border: none; }
+  .btn-gold:hover { opacity: 0.88; }
+  .btn-delete {
+    background: none; border: none; color: var(--ink-soft);
+    font-size: 12px; padding: 4px 8px; border-radius: 4px;
+    cursor: pointer; transition: color .15s;
+  }
+  .btn-delete:hover { color: var(--red); }
+  .focus-ring:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  /* ── Form fields ── */
+  .field-label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 4px; }
+  .field-input {
+    border: 1px solid var(--rule); border-radius: 4px; padding: 8px 10px;
+    font-size: 14px; background: white; width: 100%;
+    transition: border-color .15s;
+  }
+  .field-input:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
+  textarea.field-input { resize: vertical; min-height: 80px; font-family: inherit; }
+
+  /* ── Tab navigation ── */
+  .tab-nav {
+    display: flex; border-bottom: 2px solid var(--ink);
+    background: #fffdf8; gap: 0;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 14px 18px; font-size: 14px; font-weight: 600;
+    color: var(--ink-soft); border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: color .15s, border-color .15s;
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--ink); border-bottom-color: var(--gold); }
+  .tab-btn .tab-icon { font-size: 16px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th {
+    text-align: left;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--ink-soft); border-bottom: 2px solid var(--ink);
+    padding: 12px;
+  }
+  thead th:first-child { padding-left: 24px; }
+  tbody td { padding: 12px; border-bottom: 1px solid var(--paper-line); }
+  tbody td:first-child { padding-left: 24px; }
+  tbody td:last-child { padding-right: 12px; }
+  .stripe-row:nth-child(even) { background: #f2eedf; }
+
+  /* ── Badges ── */
+  .badge {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    font-weight: 600; padding: 4px 8px; border-radius: 4px; display: inline-block;
+  }
+  .badge-income { background: var(--green-soft); color: var(--green); }
+  .badge-expense { background: var(--red-soft); color: var(--red); }
+
+  /* ── Report rows ── */
+  .report-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; background: #fffdf8;
+    border: 1px solid var(--paper-line); border-radius: 4px; font-size: 13px;
+  }
+  .report-row .amt {
+    font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+  }
+
+  /* ── Banners ── */
+  .banner {
+    padding: 10px 16px; border-radius: 4px; font-size: 13px; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .banner-error { background: var(--red-soft); color: var(--red); border: 1px solid var(--red); }
+  .banner-info  { background: var(--gold-soft); color: var(--gold); border: 1px solid var(--gold); }
+  .banner-ok    { background: var(--green-soft); color: var(--green); border: 1px solid var(--green); }
+
+  /* ── Settings panel ── */
+  .settings-section {
+    border: 1px solid var(--paper-line); border-radius: 6px;
+    overflow: hidden; margin-bottom: 24px;
+  }
+  .settings-section-header {
+    background: var(--ink); color: #fffdf8;
+    padding: 10px 20px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .settings-body { padding: 20px; background: #fffdf8; }
+  .settings-row {
+    display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px;
+  }
+  .settings-row:last-child { margin-bottom: 0; }
+  .settings-hint { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .connection-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600;
+    font-family: "JetBrains Mono", Consolas, monospace;
+  }
+  .connection-badge-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .badge-connected    { background: var(--green-soft); color: var(--green); }
+  .badge-disconnected { background: var(--red-soft); color: var(--red); }
+  .badge-dot-on  { background: var(--green); }
+  .badge-dot-off { background: var(--red); }
+
+  /* ── Sync status dot ── */
+  @keyframes dotPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .sync-syncing { background: var(--gold) !important; animation: dotPulse 1s ease-in-out infinite; }
+  .sync-ok      { background: var(--green) !important; }
+  .sync-error   { background: var(--red) !important; }
+  .sync-offline { background: var(--rule) !important; }
+
+  @keyframes pulseIn {
+    0% { transform: scale(0.97); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pulse-update { animation: pulseIn 0.28s ease-out; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-update { animation: none; }
+    .sync-syncing { animation: none; }
+  }
+
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
+
+  .overflow-x-auto { overflow-x: auto; }
+  .overflow-hidden { overflow: hidden; }
+  .w-full { width: 100%; }
+  .whitespace-nowrap { white-space: nowrap; }
+  .border-b { border-bottom: 1px solid var(--paper-line); }
+  .rounded { border-radius: 4px; }
+</style>
+</head>
+<body class="c-ink">
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header style="background:#fffdf8; border-bottom: 2px solid var(--ink);">
+  <div class="wrap flex items-center justify-between flex-wrap gap-3"
+       style="padding-top:16px; padding-bottom:0;">
+
+    <div class="flex items-baseline gap-3">
+      <div>
+        <h1 id="headerBizName" class="text-2xl font-bold tracking-tight" style="margin:0;">
+          Tweek Closet
+        </h1>
+        <p class="mono text-xs c-soft uppercase tracking-wide" style="margin:2px 0 0;">
+          Daily Sales &amp; Expense Record
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 flex-wrap">
+      <span class="mono text-xs c-soft flex items-center gap-1" style="gap:6px;">
+        <span id="syncDot" style="width:8px;height:8px;border-radius:50%;background:var(--rule);display:inline-block;"></span>
+        <span id="syncLabel">Starting…</span>
+      </span>
+      <span id="entry-count" class="mono text-xs c-soft">0 entries</span>
+      <button id="exportBtn" class="btn btn-outline focus-ring">↓ Export CSV</button>
+      <button id="clearBtn"  class="btn btn-danger focus-ring">Clear all</button>
+    </div>
+  </div>
+
+  <!-- TAB NAV — sits flush at bottom of header -->
+  <div class="wrap" style="padding-bottom:0;">
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active focus-ring" data-tab="dashboard" role="tab">
+        <span class="tab-icon">📊</span> Dashboard
+      </button>
+      <button class="tab-btn focus-ring" data-tab="report" role="tab">
+        <span class="tab-icon">📋</span> Daily Report
+      </button>
+      <button class="tab-btn focus-ring" data-tab="log" role="tab">
+        <span class="tab-icon">📒</span> Transaction Log
+      </button>
+      <button class="tab-btn focus-ring" data-tab="settings" role="tab">
+        <span class="tab-icon">⚙️</span> Settings
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" style="padding-top:28px; padding-bottom:40px;">
+
+  <!-- Sync error banner -->
+  <div id="syncBanner" class="hidden banner banner-error">
+    <span id="syncBannerText"></span>
+    <button id="syncRetryBtn" class="btn btn-outline">Retry</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 1 — DASHBOARD
+  ══════════════════════════════════════════ -->
+  <div id="tab-dashboard" class="tab-panel active">
+
+    <!-- Summary cards -->
+    <section aria-label="Financial summary" class="grid grid-sm-3 mb-10">
+
+      <div class="tab-stub ledger-card p-5">
+        <p class="mono text-xs uppercase tracking-widest c-soft" style="margin:0 0 4px;">Total Revenue</p>
+        <p id="totalRevenue" class="mono text-3xl font-bold c-green" style="margin:0;">GHS 0.00</p>
+        <p class="text-xs c-soft" style="margin:4px 0 0;">Sum of all income entries</p>
+      </div>
+
+      <div class="tab-stub ledger-card p-5">
+        <p class="mono text-xs uppercase tracking-widest c-soft" style="margin:0 0 4px;">Total Expenses</p>
+        <p id="totalExpenses" class="mono text-3xl font-bold c-red" style="margin:0;">GHS 0.00</p>
+        <p class="text-xs c-soft" style="margin:4px 0 0;">Sum of all expense entries</p>
+      </div>
+
+      <div id="marginCard" class="tab-stub ledger-card p-5" style="transition:background-color .3s;">
+        <p class="mono text-xs uppercase tracking-widest c-soft" style="margin:0 0 4px;">Net Profit Margin</p>
+        <p id="netMargin" class="mono text-3xl font-bold c-soft" style="margin:0;">—</p>
+        <p id="netProfitValue" class="text-xs c-soft" style="margin:4px 0 0;">Net profit: GHS 0.00</p>
+      </div>
+
+    </section>
+
+    <!-- Quick entry form -->
+    <section aria-label="Add transaction" class="ledger-card p-6 mb-10">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-lg font-bold" style="margin:0;">Quick Entry</h2>
+        <span class="mono text-xs c-soft uppercase tracking-widest">New transaction</span>
+      </div>
+
+      <form id="entry-form" class="grid grid-md-6" novalidate>
+
+        <div class="flex-col gap-1 md-col-1">
+          <label for="date" class="field-label">Date</label>
+          <input type="date" id="date" required class="field-input focus-ring" />
+        </div>
+
+        <div class="flex-col gap-1 md-col-1">
+          <label for="type" class="field-label">Type</label>
+          <select id="type" required class="field-input focus-ring">
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+          </select>
+        </div>
+
+        <div class="flex-col gap-1 md-col-1">
+          <label for="category" class="field-label">Category</label>
+          <select id="category" required class="field-input focus-ring"></select>
+        </div>
+
+        <div class="flex-col gap-1 md-col-1" id="paymentLocationWrap">
+          <label for="paymentLocation" class="field-label">Money Went To</label>
+          <select id="paymentLocation" class="field-input focus-ring">
+            <option value="Cash">Cash</option>
+            <option value="Mobile Money">Mobile Money</option>
+            <option value="Bank">Bank</option>
+          </select>
+        </div>
+
+        <div class="flex-col gap-1 md-col-1">
+          <label for="amount" class="field-label">Amount (GHS)</label>
+          <input type="number" id="amount" step="0.01" min="0.01"
+            placeholder="0.00" required class="field-input focus-ring" />
+        </div>
+
+        <div class="flex-col gap-1 md-col-2">
+          <label for="description" class="field-label">Description</label>
+          <input type="text" id="description"
+            placeholder="e.g. Lace gowns, Lagos trip batch 3"
+            maxlength="120" class="field-input focus-ring" />
+        </div>
+
+        <div class="md-col-6 flex items-center justify-between" style="margin-top:4px;">
+          <p id="formError" class="text-xs c-red font-semibold" style="margin:0;"
+             role="alert" aria-live="polite"></p>
+          <button type="submit" class="btn btn-primary focus-ring">+ Add to Ledger</button>
+        </div>
+
+      </form>
+    </section>
+
+  </div><!-- /tab-dashboard -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 2 — DAILY REPORT
+  ══════════════════════════════════════════ -->
+  <div id="tab-report" class="tab-panel">
+
+    <section aria-label="Daily report" class="ledger-card p-6">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h2 class="text-lg font-bold" style="margin:0;">Daily Report</h2>
+        <div class="flex items-center gap-2">
+          <label for="reportDate" class="sr-only">Report date</label>
+          <input type="date" id="reportDate" class="field-input focus-ring" style="width:auto;" />
+          <button id="reportExportBtn" class="btn btn-outline focus-ring">↓ Export this day</button>
+        </div>
+      </div>
+
+      <div id="reportEmpty" class="hidden text-center py-14">
+        <p class="c-soft text-sm" style="margin:0;">No entries recorded for this date.</p>
+      </div>
+
+      <div id="reportContent">
+        <div class="grid grid-sm-3 gap-4" style="margin-bottom:20px;">
+          <div class="p-5" style="background:var(--paper);border-radius:4px;border:1px solid var(--paper-line);">
+            <p class="mono text-xs uppercase tracking-widest c-soft" style="margin:0 0 4px;">Day's Revenue</p>
+            <p id="reportRevenue" class="mono text-2xl font-bold c-green" style="margin:0;">GHS 0.00</p>
+          </div>
+          <div class="p-5" style="background:var(--paper);border-radius:4px;border:1px solid var(--paper-line);">
+            <p class="mono text-xs uppercase tracking-widest c-soft" style="margin:0 0 4px;">Day's Expenses</p>
+            <p id="reportExpenses" class="mono text-2xl font-bold c-red" style="margin:0;">GHS 0.00</p>
+          </div>
+          <div class="p-5" style="background:var(--paper);border-radius:4px;border:1px solid var(--paper-line);">
+            <p class="mono text-xs uppercase tracking-widest c-soft" style="margin:0 0 4px;">Day's Net</p>
+            <p id="reportNet" class="mono text-2xl font-bold c-soft" style="margin:0;">GHS 0.00</p>
+          </div>
+        </div>
+
+        <div class="grid grid-sm-3 gap-4">
+          <div>
+            <p class="text-xs font-semibold c-soft" style="margin:0 0 8px;">Revenue by Payment Location</p>
+            <div id="reportByLocation" class="flex-col gap-1" style="gap:6px;"></div>
+          </div>
+          <div style="grid-column: span 2;">
+            <p class="text-xs font-semibold c-soft" style="margin:0 0 8px;">Expenses by Category</p>
+            <div id="reportByCategory" class="flex-col gap-1" style="gap:6px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /tab-report -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 3 — TRANSACTION LOG
+  ══════════════════════════════════════════ -->
+  <div id="tab-log" class="tab-panel">
+
+    <section aria-label="Transaction log" class="ledger-card overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b flex-wrap gap-2">
+        <h2 class="text-lg font-bold" style="margin:0;">Transaction Log</h2>
+        <div class="flex items-center gap-2">
+          <label for="filterLocation" class="sr-only">Filter by payment location</label>
+          <select id="filterLocation" class="mono text-xs focus-ring"
+            style="border:1px solid var(--rule);border-radius:4px;padding:6px 8px;background:white;">
+            <option value="All">All locations</option>
+            <option value="Cash">Cash only</option>
+            <option value="Mobile Money">Mobile Money only</option>
+            <option value="Bank">Bank only</option>
+          </select>
+          <label for="filterType" class="sr-only">Filter by type</label>
+          <select id="filterType" class="mono text-xs focus-ring"
+            style="border:1px solid var(--rule);border-radius:4px;padding:6px 8px;background:white;">
+            <option value="All">All entries</option>
+            <option value="Income">Income only</option>
+            <option value="Expense">Expenses only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Money</th>
+              <th class="text-right">Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="hidden" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center;">
+        <p class="c-soft text-sm" style="margin:0;">No entries yet. Add your first transaction on the Dashboard tab.</p>
+      </div>
+    </section>
+
+  </div><!-- /tab-log -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 4 — SETTINGS
+  ══════════════════════════════════════════ -->
+  <div id="tab-settings" class="tab-panel">
+
+    <!-- Business profile -->
+    <div class="settings-section">
+      <div class="settings-section-header">🏪 Business Profile</div>
+      <div class="settings-body">
+
+        <div class="settings-row">
+          <label for="s-bizName" class="field-label">Business Name</label>
+          <input type="text" id="s-bizName" class="field-input focus-ring"
+            placeholder="e.g. Tweek Closet" maxlength="60" />
+          <p class="settings-hint">Shown in the header and on exported reports.</p>
+        </div>
+
+        <div class="settings-row">
+          <label for="s-currency" class="field-label">Currency Code</label>
+          <input type="text" id="s-currency" class="field-input focus-ring"
+            placeholder="GHS" maxlength="5" style="max-width:120px;" />
+          <p class="settings-hint">3-letter code shown before amounts (GHS, USD, NGN…).</p>
+        </div>
+
+        <button id="saveBizBtn" class="btn btn-primary focus-ring">Save Profile</button>
+        <span id="bizSaveMsg" class="text-xs c-green" style="margin-left:10px;display:none;">✓ Saved</span>
+
+      </div>
+    </div>
+
+    <!-- Google Sheets connection -->
+    <div class="settings-section">
+      <div class="settings-section-header">☁️ Google Sheets Connection</div>
+      <div class="settings-body">
+
+        <div class="flex items-center gap-3" style="margin-bottom:16px;">
+          <span class="text-sm font-semibold">Current status:</span>
+          <span id="connBadge" class="connection-badge badge-disconnected">
+            <span class="connection-badge-dot badge-dot-off"></span>
+            Not connected
+          </span>
+        </div>
+
+        <div class="settings-row">
+          <label for="s-apiUrl" class="field-label">Apps Script Web App URL</label>
+          <input type="url" id="s-apiUrl" class="field-input focus-ring"
+            placeholder="https://script.google.com/macros/s/.../exec" />
+          <p class="settings-hint">
+            Paste the URL from your Google Apps Script deployment here.
+            See the Setup Instructions file for how to get this URL.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+          <button id="saveApiBtn" class="btn btn-gold focus-ring">☁ Save &amp; Connect</button>
+          <button id="testApiBtn" class="btn btn-outline focus-ring">⚡ Test connection</button>
+          <button id="disconnectBtn" class="btn btn-danger focus-ring">✕ Disconnect</button>
+        </div>
+        <p id="apiSaveMsg" class="text-xs" style="margin-top:10px;display:none;"></p>
+
+        <!-- What each Google account controls -->
+        <div style="margin-top:24px;padding:14px 16px;background:var(--paper);border-radius:4px;border:1px solid var(--paper-line);">
+          <p class="text-xs font-semibold c-soft uppercase tracking-wide" style="margin:0 0 8px;">How accounts work</p>
+          <p class="text-sm c-soft" style="margin:0;line-height:1.6;">
+            Each Google Sheet has its own Apps Script URL. To switch to a different Google account
+            (or a different spreadsheet), just deploy a new Apps Script in that sheet and paste
+            the new URL above — then click <strong>Save &amp; Connect</strong>. Your local cache
+            will clear and the app will reload data from the new sheet.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Data management -->
+    <div class="settings-section">
+      <div class="settings-section-header">🗄️ Data Management</div>
+      <div class="settings-body">
+        <div class="flex-col gap-3" style="gap:12px;">
+          <div>
+            <button id="exportAllBtn" class="btn btn-outline focus-ring">↓ Export all data to CSV</button>
+            <p class="settings-hint" style="margin-top:4px;">Downloads every entry as a spreadsheet file.</p>
+          </div>
+          <div>
+            <button id="clearCacheBtn" class="btn btn-danger focus-ring">Clear local cache</button>
+            <p class="settings-hint" style="margin-top:4px;">Removes the offline copy stored on this device only. Your Google Sheet data is untouched.</p>
+          </div>
+          <div>
+            <button id="forceResyncBtn" class="btn btn-outline focus-ring">↺ Force resync from Sheet</button>
+            <p class="settings-hint" style="margin-top:4px;">Re-fetches all data from your Google Sheet and refreshes the local cache.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App info -->
+    <div class="settings-section">
+      <div class="settings-section-header">ℹ️ About</div>
+      <div class="settings-body">
+        <p class="text-sm c-soft" style="margin:0;line-height:1.7;">
+          <strong id="aboutBizName">Tweek Closet</strong> Ledger — Daily Sales &amp; Expense Tracker<br>
+          Built for import businesses. Data syncs to Google Sheets so you can access it
+          from any browser or device. A local cache is kept on this device as a backup.<br><br>
+          <span class="mono text-xs">Version 3.0</span>
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /tab-settings -->
+
+  <p class="mono text-xs c-soft text-center mt-8">
+    <span id="footerBizName">Tweek Closet</span> Ledger ·
+    Data syncs to Google Sheets · Local backup kept on this device
+  </p>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // ═══════════════════════════════════════════════════
+  // CONSTANTS & SETTINGS (loaded from localStorage)
+  // ═══════════════════════════════════════════════════
+  const SETTINGS_KEY   = "ledger_settings_v1";
+  const CACHE_KEY      = "ledger_local_cache_v1";
+
+  const CATEGORIES = {
+    Income:  ["Sales", "Services Rendered", "Other Income"],
+    Expense: ["Travel (Buying Trip)", "Product Cost", "Shipping", "Customs Duty",
+              "Inventory / Supplies", "Rent", "Utilities", "Wages",
+              "Transport (Local)", "Marketing", "Other Expense"]
+  };
+
+  // Defaults — overridden by saved settings
+  let settings = {
+    bizName:  "Tweek Closet",
+    currency: "GHS",
+    apiUrl:   ""
+  };
+
+  // ═══════════════════════════════════════════════════
+  // ELEMENT REFERENCES
+  // ═══════════════════════════════════════════════════
+
+  // Header / status
+  const headerBizName  = document.getElementById("headerBizName");
+  const syncDot        = document.getElementById("syncDot");
+  const syncLabel      = document.getElementById("syncLabel");
+  const entryCount     = document.getElementById("entry-count");
+  const exportBtn      = document.getElementById("exportBtn");
+  const clearBtn       = document.getElementById("clearBtn");
+  const syncBanner     = document.getElementById("syncBanner");
+  const syncBannerText = document.getElementById("syncBannerText");
+  const syncRetryBtn   = document.getElementById("syncRetryBtn");
+
+  // Tab navigation
+  const tabBtns   = document.querySelectorAll(".tab-btn");
+  const tabPanels = document.querySelectorAll(".tab-panel");
+
+  // Dashboard – summary cards
+  const totalRevenueEl  = document.getElementById("totalRevenue");
+  const totalExpensesEl = document.getElementById("totalExpenses");
+  const netMarginEl     = document.getElementById("netMargin");
+  const netProfitValueEl= document.getElementById("netProfitValue");
+  const marginCard      = document.getElementById("marginCard");
+
+  // Dashboard – entry form
+  const form                = document.getElementById("entry-form");
+  const dateInput           = document.getElementById("date");
+  const typeSelect          = document.getElementById("type");
+  const categorySelect      = document.getElementById("category");
+  const paymentLocationWrap = document.getElementById("paymentLocationWrap");
+  const paymentLocationSelect = document.getElementById("paymentLocation");
+  const amountInput         = document.getElementById("amount");
+  const descriptionInput    = document.getElementById("description");
+  const formError           = document.getElementById("formError");
+
+  // Report tab
+  const reportDateInput   = document.getElementById("reportDate");
+  const reportExportBtn   = document.getElementById("reportExportBtn");
+  const reportEmpty       = document.getElementById("reportEmpty");
+  const reportContent     = document.getElementById("reportContent");
+  const reportRevenueEl   = document.getElementById("reportRevenue");
+  const reportExpensesEl  = document.getElementById("reportExpenses");
+  const reportNetEl       = document.getElementById("reportNet");
+  const reportByLocationEl= document.getElementById("reportByLocation");
+  const reportByCategoryEl= document.getElementById("reportByCategory");
+
+  // Log tab
+  const logBody      = document.getElementById("logBody");
+  const emptyState   = document.getElementById("emptyState");
+  const filterType   = document.getElementById("filterType");
+  const filterLocation = document.getElementById("filterLocation");
+
+  // Settings tab
+  const sBizName      = document.getElementById("s-bizName");
+  const sCurrency     = document.getElementById("s-currency");
+  const sApiUrl       = document.getElementById("s-apiUrl");
+  const saveBizBtn    = document.getElementById("saveBizBtn");
+  const bizSaveMsg    = document.getElementById("bizSaveMsg");
+  const saveApiBtn    = document.getElementById("saveApiBtn");
+  const testApiBtn    = document.getElementById("testApiBtn");
+  const disconnectBtn = document.getElementById("disconnectBtn");
+  const apiSaveMsg    = document.getElementById("apiSaveMsg");
+  const connBadge     = document.getElementById("connBadge");
+  const exportAllBtn  = document.getElementById("exportAllBtn");
+  const clearCacheBtn = document.getElementById("clearCacheBtn");
+  const forceResyncBtn= document.getElementById("forceResyncBtn");
+  const footerBizName = document.getElementById("footerBizName");
+  const aboutBizName  = document.getElementById("aboutBizName");
+
+  // ═══════════════════════════════════════════════════
+  // STATE
+  // ═══════════════════════════════════════════════════
+  let transactions = [];
+
+  // ═══════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════
+  async function init() {
+    loadSettings();
+    applySettings();
+
+    dateInput.value   = today();
+    reportDateInput.value = today();
+
+    populateCategories();
+    wireEvents();
+
+    transactions = loadLocalCache();
+    render();
+
+    await loadFromCloud();
+  }
+
+  function wireEvents() {
+    // Tabs
+    tabBtns.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+    // Dashboard form
+    typeSelect.addEventListener("change", populateCategories);
+    form.addEventListener("submit", handleSubmit);
+
+    // Log filters
+    filterType.addEventListener("change", renderLog);
+    filterLocation.addEventListener("change", renderLog);
+
+    // Header actions
+    exportBtn.addEventListener("click", exportToCSV);
+    clearBtn.addEventListener("click", handleClearAll);
+    logBody.addEventListener("click", handleRowDelete);
+    syncRetryBtn.addEventListener("click", loadFromCloud);
+
+    // Report
+    reportDateInput.addEventListener("change", renderReport);
+    reportExportBtn.addEventListener("click", exportDayToCSV);
+
+    // Settings — business profile
+    saveBizBtn.addEventListener("click", saveBusinessProfile);
+
+    // Settings — connection
+    saveApiBtn.addEventListener("click", saveAndConnect);
+    testApiBtn.addEventListener("click", testConnection);
+    disconnectBtn.addEventListener("click", disconnectSheet);
+
+    // Settings — data management
+    exportAllBtn.addEventListener("click", exportToCSV);
+    clearCacheBtn.addEventListener("click", clearLocalCacheOnly);
+    forceResyncBtn.addEventListener("click", async () => {
+      transactions = [];
+      saveLocalCache();
+      render();
+      await loadFromCloud();
+    });
+  }
+
+  // ═══════════════════════════════════════════════════
+  // TAB SWITCHING
+  // ═══════════════════════════════════════════════════
+  function switchTab(tabId) {
+    tabBtns.forEach(b => {
+      b.classList.toggle("active", b.dataset.tab === tabId);
+      b.setAttribute("aria-selected", b.dataset.tab === tabId);
+    });
+    tabPanels.forEach(p => {
+      p.classList.toggle("active", p.id === "tab-" + tabId);
+    });
+    // Render report fresh when switching to it
+    if (tabId === "report") renderReport();
+  }
+
+  // ═══════════════════════════════════════════════════
+  // SETTINGS — load / save / apply
+  // ═══════════════════════════════════════════════════
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (raw) Object.assign(settings, JSON.parse(raw));
+    } catch(e) { console.error("Could not load settings:", e); }
+  }
+
+  function saveSettings() {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch(e) { console.error("Could not save settings:", e); }
+  }
+
+  function applySettings() {
+    // Business name everywhere
+    const name = settings.bizName || "Ledger";
+    headerBizName.textContent  = name;
+    footerBizName.textContent  = name;
+    aboutBizName.textContent   = name;
+    document.getElementById("pageTitle").textContent = name + " — Ledger";
+    document.title = name + " — Ledger";
+
+    // Settings form fields
+    sBizName.value  = settings.bizName  || "";
+    sCurrency.value = settings.currency || "GHS";
+    sApiUrl.value   = settings.apiUrl   || "";
+
+    // Connection badge
+    updateConnectionBadge();
+  }
+
+  function updateConnectionBadge() {
+    const connected = isApiConfigured();
+    connBadge.className = "connection-badge " + (connected ? "badge-connected" : "badge-disconnected");
+    connBadge.innerHTML = `
+      <span class="connection-badge-dot ${connected ? "badge-dot-on" : "badge-dot-off"}"></span>
+      ${connected ? "Connected to Google Sheet" : "Not connected"}
+    `;
+  }
+
+  function saveBusinessProfile() {
+    const name = sBizName.value.trim();
+    const curr = sCurrency.value.trim().toUpperCase() || "GHS";
+    if (!name) { sBizName.focus(); return; }
+    settings.bizName  = name;
+    settings.currency = curr;
+    saveSettings();
+    applySettings();
+    render();
+    bizSaveMsg.style.display = "inline";
+    setTimeout(() => { bizSaveMsg.style.display = "none"; }, 2500);
+  }
+
+  async function saveAndConnect() {
+    const url = sApiUrl.value.trim();
+    if (!url || !url.startsWith("https://")) {
+      showApiMsg("Please enter a valid URL starting with https://", "error");
+      return;
+    }
+    settings.apiUrl = url;
+    saveSettings();
+    updateConnectionBadge();
+    showApiMsg("URL saved — testing connection…", "info");
+
+    const ok = await pingCloud(url);
+    if (ok) {
+      showApiMsg("✓ Connected successfully! Loading your data now…", "ok");
+      transactions = [];
+      saveLocalCache();
+      render();
+      await loadFromCloud();
+    } else {
+      showApiMsg("✗ Could not connect. Double-check the URL and that the script is deployed as 'Anyone' access.", "error");
+    }
+  }
+
+  async function testConnection() {
+    if (!isApiConfigured()) {
+      showApiMsg("No URL saved yet. Paste your Apps Script URL above first.", "error");
+      return;
+    }
+    showApiMsg("Testing…", "info");
+    const ok = await pingCloud(settings.apiUrl);
+    showApiMsg(ok ? "✓ Connection OK — Google Sheet is reachable." : "✗ Could not reach the Google Sheet. Check the URL.", ok ? "ok" : "error");
+  }
+
+  function disconnectSheet() {
+    if (!confirm("Disconnect from the Google Sheet? Your local data cache stays intact, but no new sync will happen until you connect a new URL.")) return;
+    settings.apiUrl = "";
+    saveSettings();
+    sApiUrl.value = "";
+    updateConnectionBadge();
+    setSyncStatus("offline", "Not connected");
+    showApiMsg("Disconnected. Paste a new URL to reconnect.", "info");
+  }
+
+  function showApiMsg(text, type) {
+    apiSaveMsg.textContent = text;
+    apiSaveMsg.className = "text-xs " + { ok: "c-green", error: "c-red", info: "c-gold" }[type];
+    apiSaveMsg.style.display = "block";
+  }
+
+  // ═══════════════════════════════════════════════════
+  // CLOUD SYNC
+  // ═══════════════════════════════════════════════════
+  function isApiConfigured() {
+    return !!(settings.apiUrl && settings.apiUrl.startsWith("https://"));
+  }
+
+  async function pingCloud(url) {
+    try {
+      const res = await fetch(url, { method: "GET" });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return Array.isArray(data);
+    } catch(e) { return false; }
+  }
+
+  async function loadFromCloud() {
+    if (!isApiConfigured()) {
+      setSyncStatus("offline", "Not connected");
+      showSyncBanner("Connect to a Google Sheet in Settings → Google Sheets Connection.", "info");
+      return;
+    }
+    setSyncStatus("syncing", "Loading…");
+    try {
+      const res = await fetch(settings.apiUrl, { method: "GET" });
+      if (!res.ok) throw new Error("Server returned " + res.status);
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error("Unexpected response");
+      transactions = data;
+      saveLocalCache();
+      setSyncStatus("ok", "Synced");
+      syncBanner.classList.add("hidden");
+      render();
+    } catch(e) {
+      setSyncStatus("error", "Offline — local copy");
+      showSyncBanner("Could not reach Google Sheet (" + e.message + "). Showing local copy. Tap Retry to try again.", "error");
+    }
+  }
+
+  async function sendToCloud(action, payload) {
+    if (!isApiConfigured()) return { ok: false, offline: true };
+    try {
+      const res = await fetch(settings.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action, ...payload })
+      });
+      if (!res.ok) throw new Error("Server returned " + res.status);
+      const data = await res.json();
+      if (data && data.error) throw new Error(data.error);
+      return { ok: true, data };
+    } catch(e) {
+      return { ok: false, error: e.message };
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // SYNC STATUS UI
+  // ═══════════════════════════════════════════════════
+  function setSyncStatus(state, message) {
+    syncDot.className = "";
+    const cls = { syncing: "sync-syncing", ok: "sync-ok", error: "sync-error", offline: "sync-offline" };
+    syncDot.classList.add(cls[state] || "sync-offline");
+    syncLabel.textContent = message || state;
+  }
+
+  function showSyncBanner(message, type = "error") {
+    syncBannerText.textContent = message;
+    syncBanner.className = "banner banner-" + type;
+    syncBanner.classList.remove("hidden");
+  }
+
+  // ═══════════════════════════════════════════════════
+  // LOCAL CACHE
+  // ═══════════════════════════════════════════════════
+  function loadLocalCache() {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return [];
+      const d = JSON.parse(raw);
+      return Array.isArray(d) ? d : [];
+    } catch(e) { return []; }
+  }
+
+  function saveLocalCache() {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(transactions)); } catch(e) {}
+  }
+
+  function clearLocalCacheOnly() {
+    if (!confirm("Clear the local cache on this device? Your Google Sheet data is untouched.")) return;
+    localStorage.removeItem(CACHE_KEY);
+    transactions = [];
+    render();
+    showApiMsg("Local cache cleared. Reload from Sheet to restore data.", "info");
+  }
+
+  // ═══════════════════════════════════════════════════
+  // FORM HELPERS
+  // ═══════════════════════════════════════════════════
+  function populateCategories() {
+    const type = typeSelect.value;
+    categorySelect.innerHTML = CATEGORIES[type]
+      .map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
+      .join("");
+    paymentLocationWrap.style.display = type === "Income" ? "" : "none";
+  }
+
+  // ═══════════════════════════════════════════════════
+  // FORM SUBMISSION (add new entry)
+  // ═══════════════════════════════════════════════════
+  async function handleSubmit(e) {
+    e.preventDefault();
+    formError.textContent = "";
+
+    const date        = dateInput.value;
+    const type        = typeSelect.value;
+    const category    = categorySelect.value;
+    const amountRaw   = amountInput.value;
+    const amount      = parseFloat(amountRaw);
+    const description = descriptionInput.value.trim();
+
+    if (!date) { formError.textContent = "Pick a date."; dateInput.focus(); return; }
+    if (!amountRaw || isNaN(amount) || amount <= 0) {
+      formError.textContent = "Enter an amount greater than zero.";
+      amountInput.focus(); return;
+    }
+
+    const entry = {
+      id: crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+      date, type, category,
+      paymentLocation: type === "Income" ? paymentLocationSelect.value : "",
+      amount: Math.round(amount * 100) / 100,
+      description: description || "—",
+      createdAt: Date.now()
+    };
+
+    // Optimistic UI
+    transactions.push(entry);
+    saveLocalCache();
+
+    form.reset();
+    dateInput.value = today();
+    typeSelect.value = "Income";
+    populateCategories();
+    amountInput.focus();
+    render(entry.id);
+
+    setSyncStatus("syncing", "Saving…");
+    const result = await sendToCloud("add", { entry });
+    if (result.ok) {
+      setSyncStatus("ok", "Synced");
+    } else if (result.offline) {
+      setSyncStatus("offline", "Saved locally only");
+      showSyncBanner("Not connected to Google Sheet. Entry saved on this device — connect in Settings to sync.", "info");
+    } else {
+      setSyncStatus("error", "Save failed — kept locally");
+      showSyncBanner("Couldn't save to Google Sheet (" + result.error + "). Your entry is kept locally.", "error");
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // DELETE
+  // ═══════════════════════════════════════════════════
+  async function handleRowDelete(e) {
+    const btn = e.target.closest("[data-delete-id]");
+    if (!btn) return;
+    const id = btn.getAttribute("data-delete-id");
+    const removed = transactions.find(t => t.id === id);
+    transactions = transactions.filter(t => t.id !== id);
+    saveLocalCache();
+    render();
+
+    setSyncStatus("syncing", "Deleting…");
+    const result = await sendToCloud("delete", { id });
+    if (result.ok) {
+      setSyncStatus("ok", "Synced");
+    } else if (result.offline) {
+      setSyncStatus("offline", "Not connected");
+    } else {
+      if (removed) transactions.push(removed);
+      saveLocalCache(); render();
+      setSyncStatus("error", "Delete failed");
+      showSyncBanner("Couldn't delete from Google Sheet (" + result.error + "). Entry restored.", "error");
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // CLEAR ALL
+  // ═══════════════════════════════════════════════════
+  async function handleClearAll() {
+    if (transactions.length === 0) return;
+    if (!confirm("Clear all " + transactions.length + " entries from the Google Sheet? This cannot be undone.")) return;
+    const backup = [...transactions];
+    transactions = [];
+    saveLocalCache(); render();
+
+    setSyncStatus("syncing", "Clearing…");
+    const result = await sendToCloud("clearAll", {});
+    if (result.ok) {
+      setSyncStatus("ok", "Synced");
+    } else if (result.offline) {
+      setSyncStatus("offline", "Not connected");
+    } else {
+      transactions = backup;
+      saveLocalCache(); render();
+      setSyncStatus("error", "Clear failed");
+      showSyncBanner("Couldn't clear Google Sheet (" + result.error + "). Nothing was deleted.", "error");
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════
+  function render(highlightId) {
+    renderSummary();
+    renderLog(highlightId);
+    renderReport();
+    entryCount.textContent = transactions.length + (transactions.length === 1 ? " entry" : " entries");
+  }
+
+  function renderSummary() {
+    const revenue   = sumByType("Income");
+    const expenses  = sumByType("Expense");
+    const netProfit = revenue - expenses;
+    const margin    = revenue > 0 ? (netProfit / revenue) * 100 : null;
+
+    totalRevenueEl.textContent  = fmt(revenue);
+    totalExpensesEl.textContent = fmt(expenses);
+
+    if (margin === null) {
+      netMarginEl.textContent = "—";
+      netMarginEl.className   = "mono text-3xl font-bold c-soft";
+      marginCard.style.backgroundColor = "#fffdf8";
+    } else {
+      netMarginEl.textContent = (margin < 0 ? "−" : "") + Math.abs(margin).toFixed(1) + "%";
+      netMarginEl.className   = "mono text-3xl font-bold " + (margin >= 0 ? "c-green" : "c-red");
+      marginCard.style.backgroundColor = margin >= 0 ? "var(--green-soft)" : "var(--red-soft)";
+    }
+    netProfitValueEl.textContent = "Net profit: " + fmt(netProfit);
+
+    [totalRevenueEl, totalExpensesEl, netMarginEl].forEach(el => {
+      el.classList.remove("pulse-update");
+      void el.offsetWidth;
+      el.classList.add("pulse-update");
+    });
+  }
+
+  function renderLog(highlightId) {
+    const fType = filterType.value;
+    const fLoc  = filterLocation.value;
+    const list  = transactions
+      .filter(t => fType === "All" || t.type === fType)
+      .filter(t => fLoc  === "All" || t.paymentLocation === fLoc)
+      .slice()
+      .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+
+    if (list.length === 0) {
+      logBody.innerHTML = "";
+      emptyState.style.display = "flex";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    logBody.innerHTML = list.map(t => {
+      const isIncome  = t.type === "Income";
+      const sign      = isIncome ? "+" : "−";
+      const amtColor  = isIncome ? "c-green" : "c-red";
+      const badgeCls  = isIncome ? "badge badge-income" : "badge badge-expense";
+      const hlCls     = t.id === highlightId ? "pulse-update" : "";
+      const locLabel  = t.paymentLocation || "—";
+      return `
+        <tr class="stripe-row ${hlCls}">
+          <td class="mono text-xs whitespace-nowrap">${formatDate(t.date)}</td>
+          <td><span class="${badgeCls}">${t.type}</span></td>
+          <td class="text-xs">${escapeHtml(t.category)}</td>
+          <td class="text-xs c-soft truncate" style="max-width:200px;" title="${escapeHtml(t.description)}">${escapeHtml(t.description)}</td>
+          <td class="text-xs c-soft whitespace-nowrap">${escapeHtml(locLabel)}</td>
+          <td class="mono text-sm font-semibold text-right whitespace-nowrap ${amtColor}">${sign} ${fmt(t.amount)}</td>
+          <td class="text-right">
+            <button data-delete-id="${t.id}" class="btn-delete focus-ring" aria-label="Delete entry">✕</button>
+          </td>
+        </tr>`;
+    }).join("");
+  }
+
+  function renderReport() {
+    const day = reportDateInput.value;
+    if (!day) return;
+
+    const dayEntries = transactions.filter(t => t.date === day);
+    if (dayEntries.length === 0) {
+      reportEmpty.classList.remove("hidden");
+      reportContent.style.display = "none";
+      return;
+    }
+    reportEmpty.classList.add("hidden");
+    reportContent.style.display = "";
+
+    const inc = dayEntries.filter(t => t.type === "Income");
+    const exp = dayEntries.filter(t => t.type === "Expense");
+    const rev = inc.reduce((s, t) => s + t.amount, 0);
+    const exs = exp.reduce((s, t) => s + t.amount, 0);
+    const net = rev - exs;
+
+    reportRevenueEl.textContent  = fmt(rev);
+    reportExpensesEl.textContent = fmt(exs);
+    reportNetEl.textContent      = fmt(net);
+    reportNetEl.className        = "mono text-2xl font-bold " + (net >= 0 ? "c-green" : "c-red");
+
+    reportByLocationEl.innerHTML = groupSum(inc, t => t.paymentLocation).length === 0
+      ? `<p class="text-xs c-soft" style="margin:0;">No income for this day.</p>`
+      : groupSum(inc, t => t.paymentLocation).map(([loc, amt]) =>
+          `<div class="report-row"><span>${escapeHtml(loc)}</span><span class="amt c-green">${fmt(amt)}</span></div>`
+        ).join("");
+
+    reportByCategoryEl.innerHTML = groupSum(exp, t => t.category).length === 0
+      ? `<p class="text-xs c-soft" style="margin:0;">No expenses for this day.</p>`
+      : groupSum(exp, t => t.category).map(([cat, amt]) =>
+          `<div class="report-row"><span>${escapeHtml(cat)}</span><span class="amt c-red">${fmt(amt)}</span></div>`
+        ).join("");
+  }
+
+  // ═══════════════════════════════════════════════════
+  // CALCULATIONS
+  // ═══════════════════════════════════════════════════
+  function sumByType(type) {
+    return transactions.filter(t => t.type === type).reduce((s, t) => s + t.amount, 0);
+  }
+
+  function groupSum(list, keyFn) {
+    const map = new Map();
+    list.forEach(t => {
+      const k = keyFn(t) || "—";
+      map.set(k, (map.get(k) || 0) + t.amount);
+    });
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }
+
+  // ═══════════════════════════════════════════════════
+  // EXPORT
+  // ═══════════════════════════════════════════════════
+  function exportToCSV() {
+    if (transactions.length === 0) {
+      formError.textContent = "Nothing to export yet.";
+      setTimeout(() => formError.textContent = "", 2500);
+      return;
+    }
+    const header = ["Date","Type","Category","Payment Location","Amount","Description"];
+    const rows   = transactions
+      .slice().sort((a,b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt)
+      .map(t => [t.date, t.type, t.category, t.paymentLocation||"", t.amount.toFixed(2), t.description]);
+    downloadCSV(header, rows, `${settings.bizName}_ledger_${today()}.csv`);
+  }
+
+  function exportDayToCSV() {
+    const day = reportDateInput.value;
+    if (!day) return;
+    const dayEntries = transactions.filter(t => t.date === day);
+    if (dayEntries.length === 0) {
+      showSyncBanner("Nothing to export for the selected date.", "info");
+      return;
+    }
+    const header = ["Date","Type","Category","Payment Location","Amount","Description"];
+    const rows   = dayEntries.slice()
+      .sort((a,b) => a.createdAt - b.createdAt)
+      .map(t => [t.date, t.type, t.category, t.paymentLocation||"", t.amount.toFixed(2), t.description]);
+
+    const inc = dayEntries.filter(t => t.type === "Income");
+    const exp = dayEntries.filter(t => t.type === "Expense");
+    const rev = inc.reduce((s,t) => s + t.amount, 0);
+    const exs = exp.reduce((s,t) => s + t.amount, 0);
+    rows.push([]);
+    rows.push(["SUMMARY","","","","",""]);
+    rows.push(["Total Revenue","","","",rev.toFixed(2),""]);
+    rows.push(["Total Expenses","","","",exs.toFixed(2),""]);
+    rows.push(["Net Profit","","",(rev-exs).toFixed(2),"",""]);
+    groupSum(inc, t => t.paymentLocation).forEach(([loc,amt]) =>
+      rows.push([`Revenue — ${loc}`,"","","",amt.toFixed(2),""]));
+    groupSum(exp, t => t.category).forEach(([cat,amt]) =>
+      rows.push([`Expense — ${cat}`,"","","",amt.toFixed(2),""]));
+
+    downloadCSV(header, rows, `${settings.bizName}_daily_report_${day}.csv`);
+  }
+
+  function downloadCSV(header, rows, filename) {
+    const lines = [header, ...rows].map(row =>
+      row.map(f => { const s = String(f).replace(/"/g,'""'); return /[",\n]/.test(s) ? `"${s}"` : s; }).join(",")
+    ).join("\r\n");
+    const blob = new Blob([lines], { type: "text/csv;charset=utf-8;" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  // ═══════════════════════════════════════════════════
+  // UTILITIES
+  // ═══════════════════════════════════════════════════
+  function fmt(value) {
+    const v = Number.isFinite(value) ? value : 0;
+    const curr = settings.currency || "GHS";
+    return curr + " " + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function today() {
+    return new Date().toISOString().split("T")[0];
+  }
+
+  function formatDate(isoDate) {
+    const d = new Date(isoDate + "T00:00:00");
+    if (isNaN(d.getTime())) return isoDate;
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
